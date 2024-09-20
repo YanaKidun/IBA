@@ -1,0 +1,80 @@
+@startuml
+
+actor Клиент
+
+' API Gateway
+entity "API Gateway" as Gateway
+
+' Микросервисы
+entity "Auth Service" as AuthService
+entity "Product Service" as ProductService
+entity "Cart Service" as CartService
+entity "Order Service" as OrderService
+entity "Inventory Service" as InventoryService
+entity "Payment Service" as PaymentService
+entity "Notification Service" as NotificationService
+
+' Брокер сообщений
+queue "Message Broker" as Broker
+
+' Базы данных для каждого микросервиса
+database "Auth DB" as AuthDB
+database "Product DB" as ProductDB
+database "Cart DB" as CartDB
+database "Order DB" as OrderDB
+database "Inventory DB" as InventoryDB
+database "Payment DB" as PaymentDB
+
+
+== Авторизация клиента ==
+Клиент -> Gateway: Запрос авторизации (логин, пароль)
+Gateway -> AuthService: Проверь учетные данные
+AuthService -> AuthDB: SELECT * FROM users WHERE username = 'john_doe'
+AuthDB -> AuthService: Вернуть user_id, статус (VIP)
+AuthService -> Gateway: Авторизация успешна (user_id = 101, статус = VIP)
+Gateway -> Клиент: Авторизация успешна
+
+== Добавление смартфона в корзину ==
+Клиент -> Gateway: Запрос на выбор смартфона (product_id = 202)
+Gateway -> ProductService: Запрос информации о продукте (product_id = 202)
+ProductService -> ProductDB: SELECT * FROM products WHERE product_id = 202
+ProductDB -> ProductService: Вернуть информацию о продукте (цена = 600)
+ProductService -> Gateway: Возврат информации о продукте (цена = 600)
+Gateway -> Клиент: Отобразить данные о продукте
+
+Клиент -> Gateway: Добавить смартфон в корзину
+Gateway -> CartService: Добавить товар в корзину (user_id = 101, product_id = 202)
+CartService -> CartDB: INSERT INTO cart (user_id, product_id, quantity) VALUES (101, 202, 1)
+CartDB -> CartService: Подтверждение добавления в корзину
+CartService -> Gateway: Товар добавлен в корзину
+Gateway -> Клиент: Товар добавлен в корзину
+
+== Покупка смартфона ==
+Клиент -> Gateway: Подтверждение покупки
+Gateway -> OrderService: Создать заказ (user_id = 101, product_id = 202)
+OrderService -> Broker: Публикует сообщение о создании заказа
+Broker --> InventoryService: Сообщение об обновлении остатков (product_id = 202)
+
+OrderService -> OrderDB: INSERT INTO orders (user_id, product_id, status) VALUES (101, 202, 'pending')
+
+== Обновление остатков ==
+InventoryService -> InventoryDB: UPDATE products SET stock = stock - 1 WHERE product_id = 202
+InventoryDB -> InventoryService: Подтверждение обновления остатков
+InventoryService -> Broker: Сообщение об успешном обновлении остатков
+Broker --> OrderService: Сообщение об обновлении остатков
+
+OrderService -> OrderDB: UPDATE orders SET status = 'inventory_updated' WHERE order_id = 1
+
+== Обработка платежа ==
+OrderService -> Broker: Публикует сообщение о необходимости оплаты
+Broker --> PaymentService: Сообщение для оплаты заказа (order_id = 1, user_id = 101, сумма = 540)
+PaymentService -> PaymentDB: INSERT INTO payments (order_id, user_id, amount) VALUES (1, 101, 540)
+
+== Уведомление клиента ==
+PaymentService -> Broker: Публикует сообщение об успешной оплате
+Broker --> NotificationService: Сообщение для отправки уведомления клиенту
+NotificationService -> Клиент: Ваш заказ успешно оплачен
+
+
+
+@enduml
