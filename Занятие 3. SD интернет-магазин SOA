@@ -1,0 +1,47 @@
+@startuml
+actor Client as "Клиент"
+participant "ESB" as ESB
+participant "Auth Service" as AuthService
+participant "Product Service" as ProductService
+participant "Cart Service" as CartService
+participant "Order Service" as OrderService
+database "Database" as DB
+
+== Авторизация клиента ==
+Client -> ESB: Ввод логина и пароля
+ESB -> AuthService: Запрос на авторизацию
+AuthService -> DB: Проверка учетных данных клиента
+DB -> AuthService: Успешная авторизация (user_id, статус клиента)
+AuthService -> ESB: Ответ об успешной авторизации
+ESB -> Client: Ответ о входе в систему
+
+== Добавление смартфона в корзину ==
+Client -> ESB: Выбор смартфона и запрос на добавление в корзину
+ESB -> ProductService: Запрос на информацию о товаре (id смартфона)
+ProductService -> DB: Получение информации о наличии и цене товара
+DB -> ProductService: Детали товара (цена, наличие)
+ProductService -> ESB: Ответ с информацией о товаре
+
+ESB -> CartService: Запрос на добавление товара в корзину
+CartService -> DB: Обновление данных корзины (добавление товара для user_id)
+DB -> CartService: Подтверждение добавления товара в корзину
+CartService -> ESB: Товар добавлен в корзину
+ESB -> Client: Подтверждение добавления товара
+
+== Покупка смартфона ==
+Client -> ESB: Запрос на покупку товаров в корзине
+ESB -> OrderService: Создание заказа
+OrderService -> CartService: Блокировка товаров в корзине
+CartService -> DB: Обновление данных корзины (блокировка товара для user_id)
+DB -> CartService: Подтверждение блокировки товаров
+
+OrderService -> ProductService: Уменьшение количества товара на складе
+ProductService -> DB: Обновление количества товара (уменьшение stock)
+DB -> ProductService: Подтверждение обновления stock
+
+OrderService -> DB: Запись данных о новом заказе (user_id, сумма)
+DB -> OrderService: Подтверждение создания заказа
+
+OrderService -> ESB: Подтверждение успешной покупки
+ESB -> Client: Сообщение о завершении покупки
+@enduml
