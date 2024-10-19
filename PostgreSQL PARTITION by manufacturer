@@ -1,0 +1,45 @@
+-- Шаг 1: Создание основной таблицы
+CREATE TABLE cars (
+    id SERIAL PRIMARY KEY,
+    model VARCHAR(100),
+    manufacturer VARCHAR(100),
+    year_release INT CHECK (year_release >= 1886), -- Первый автомобиль был создан в 1886 году
+    class VARCHAR(50),
+    color VARCHAR(30),
+    engine_capacity DECIMAL(4, 2) -- Литры, например, 1.60
+) PARTITION BY LIST (manufacturer);
+
+-- Шаг 2: Создание секций для разных производителей
+CREATE TABLE cars_tesla PARTITION OF cars FOR VALUES IN ('Tesla');
+CREATE TABLE cars_ford PARTITION OF cars FOR VALUES IN ('Ford');
+CREATE TABLE cars_honda PARTITION OF cars FOR VALUES IN ('Honda');
+CREATE TABLE cars_toyota PARTITION OF cars FOR VALUES IN ('Toyota');
+CREATE TABLE cars_audi PARTITION OF cars FOR VALUES IN ('Audi');
+CREATE TABLE cars_chevrolet PARTITION OF cars FOR VALUES IN ('Chevrolet');
+CREATE TABLE cars_nissan PARTITION OF cars FOR VALUES IN ('Nissan');
+CREATE TABLE cars_hyundai PARTITION OF cars FOR VALUES IN ('Hyundai');
+CREATE TABLE cars_kia PARTITION OF cars FOR VALUES IN ('Kia');
+CREATE TABLE cars_bmw PARTITION OF cars FOR VALUES IN ('BMW');
+
+-- Шаг 3: Вставка данных в секции
+INSERT INTO cars (model, manufacturer, year_release, class, color, engine_capacity)
+VALUES
+    ('Model S', 'Tesla', 2020, 'Sedan', 'Red', 2.0),
+    ('Model Y', 'Tesla', 2021, 'SUV', 'Blue', 2.0),
+    ('Model 3', 'Tesla', 2023, 'Sedan', 'White', 2.0),
+    ('Mustang', 'Ford', 2020, 'Coupe', 'Blue', 5.0),
+    ('Explorer', 'Ford', 2021, 'SUV', 'Black', 3.5),
+    ('Bronco', 'Ford', 2023, 'SUV', 'Red', 2.7),
+    ('Civic', 'Honda', 2020, 'Sedan', 'Black', 1.5),
+    ('Accord', 'Honda', 2021, 'Sedan', 'Grey', 2.0),
+    ('Civic', 'Honda', 2022, 'Hatchback', 'Red', 1.5),
+    ('Camry', 'Toyota', 2020, 'Sedan', 'White', 2.5),
+    ('Corolla', 'Toyota', 2021, 'Sedan', 'White', 1.8),
+    ('RAV4', 'Toyota', 2022, 'SUV', 'Blue', 2.5),  
+    ('Q5', 'Audi', 2021, 'SUV', 'Silver', 2.0),
+    ('A4', 'Audi', 2022, 'Sedan', 'Black', 2.0),
+    ('Camaro', 'Chevrolet', 2022, 'Coupe', 'Yellow', 6.2),
+    ('Sentra', 'Nissan', 2023, 'Sedan', 'Grey', 2.0),
+    ('Kona', 'Hyundai', 2022, 'SUV', 'Orange', 2.0),
+    ('Seltos', 'Kia', 2023, 'SUV', 'Silver', 2.0),
+    ('X5', 'BMW', 2023, 'SUV', 'Black', 3.0);
