@@ -1,0 +1,69 @@
+USE my_database;
+-- Создание таблицы cars с секционированием по производителю
+CREATE TABLE cars (
+    id INT NOT NULL,                    -- Идентификатор автомобиля
+    model VARCHAR(100) NOT NULL,        -- Модель автомобиля
+    manufacturer VARCHAR(100) NOT NULL, -- Производитель
+    year_release YEAR NOT NULL,         -- Год выпуска
+    class VARCHAR(50),                  -- Класс автомобиля
+    color VARCHAR(50),                  -- Цвет автомобиля
+    engine_capacity DECIMAL(3,1),       -- Объем двигателя
+    PRIMARY KEY (id, manufacturer)      -- Первичный ключ (по id и производителю)
+)
+PARTITION BY LIST COLUMNS (manufacturer) (  -- Горизонтальное секционирование по производителю
+    PARTITION p_tesla VALUES IN ('Tesla'),        -- Секция для автомобилей Tesla
+    PARTITION p_honda VALUES IN ('Honda'),        -- Секция для автомобилей Honda
+    PARTITION p_ford VALUES IN ('Ford'),          -- Секция для автомобилей Ford
+    PARTITION p_toyota VALUES IN ('Toyota'),      -- Секция для автомобилей Toyota
+    PARTITION p_kia VALUES IN ('Kia'),            -- Секция для автомобилей Kia
+    PARTITION p_mercedes VALUES IN ('Mercedes-Benz'), -- Секция для автомобилей Mercedes-Benz
+    PARTITION p_other VALUES IN ('Volkswagen', 'Audi', 'BMW', 'Mazda')  -- Секция для других производителей
+);
+-- Вставка автомобилей Tesla (секция p_tesla)
+INSERT INTO cars (id, model, manufacturer, year_release, class, color, engine_capacity)
+VALUES
+(1, 'Model S', 'Tesla', 2020, 'E', 'White', 0.0),
+(2, 'Model 3', 'Tesla', 2021, 'D', 'Black', 0.0),
+(3, 'Model X', 'Tesla', 2019, 'E', 'Red', 0.0),
+(4, 'Model Y', 'Tesla', 2022, 'D', 'Blue', 0.0);
+
+-- Вставка автомобилей Honda (секция p_honda)
+INSERT INTO cars (id, model, manufacturer, year_release, class, color, engine_capacity)
+VALUES
+(5, 'Civic', 'Honda', 2018, 'C', 'Blue', 1.5),
+(6, 'Accord', 'Honda', 2015, 'D', 'Black', 2.4),
+(7, 'CR-V', 'Honda', 2020, 'D', 'White', 2.0);
+
+-- Вставка автомобилей Ford (секция p_ford)
+INSERT INTO cars (id, model, manufacturer, year_release, class, color, engine_capacity)
+VALUES
+(8, 'Mustang', 'Ford', 2020, 'E', 'Yellow', 5.0),
+(9, 'F-150', 'Ford', 2022, 'E', 'Gray', 5.0),
+(10, 'Focus', 'Ford', 2010, 'C', 'Red', 1.6);
+
+-- Вставка автомобилей Toyota (секция p_toyota)
+INSERT INTO cars (id, model, manufacturer, year_release, class, color, engine_capacity)
+VALUES
+(11, 'Camry', 'Toyota', 2019, 'D', 'Black', 2.5),
+(12, 'RAV4', 'Toyota', 2020, 'D', 'Silver', 2.5),
+(13, 'Corolla', 'Toyota', 2018, 'C', 'White', 1.8);
+
+-- Вставка автомобилей Kia (секция p_kia)
+INSERT INTO cars (id, model, manufacturer, year_release, class, color, engine_capacity)
+VALUES
+(14, 'Optima', 'Kia', 2014, 'D', 'Red', 2.0),
+(15, 'Seltos', 'Kia', 2021, 'C', 'Blue', 1.6);
+
+-- Вставка автомобилей Mercedes-Benz (секция p_mercedes)
+INSERT INTO cars (id, model, manufacturer, year_release, class, color, engine_capacity)
+VALUES
+(16, 'C-Class', 'Mercedes-Benz', 2023, 'D', 'Black', 1.8),
+(17, 'E-Class', 'Mercedes-Benz', 2019, 'E', 'Silver', 2.0);
+
+-- Вставка автомобилей в секцию p_other (Volkswagen, Audi, BMW, Mazda)
+INSERT INTO cars (id, model, manufacturer, year_release, class, color, engine_capacity)
+VALUES
+(18, 'Passat', 'Volkswagen', 2015, 'D', 'Blue', 1.8),
+(19, 'A4', 'Audi', 2018, 'D', 'White', 2.0),
+(20, 'X5', 'BMW', 2021, 'E', 'Gray', 3.0),
+(21, 'CX-5', 'Mazda', 2022, 'D', 'Red', 2.5);
