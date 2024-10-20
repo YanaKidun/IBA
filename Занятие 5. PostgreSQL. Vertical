@@ -1,0 +1,104 @@
+CREATE TABLE users_main (
+    id SERIAL PRIMARY KEY,             -- Идентификатор пользователя
+    name VARCHAR(100) NOT NULL,        -- Имя пользователя
+    phone VARCHAR(15),                 -- Телефон пользователя
+    create_date DATE NOT NULL          -- Дата создания записи
+);
+CREATE TABLE users_personal (
+    id INT PRIMARY KEY,                -- Идентификатор пользователя
+    birthday DATE,                     -- Дата рождения
+    address_line VARCHAR(255),         -- Адрес пользователя
+    CONSTRAINT fk_users_personal FOREIGN KEY (id) REFERENCES users_main(id) -- Связь с основной таблицей
+);
+CREATE TABLE users_documents (
+    id INT PRIMARY KEY,                -- Идентификатор пользователя
+    inn VARCHAR(12),                   -- ИНН
+    snils VARCHAR(11),                 -- СНИЛС
+    CONSTRAINT fk_users_documents FOREIGN KEY (id) REFERENCES users_main(id) -- Связь с основной таблицей
+);
+-- Вставка данных в основную таблицу
+INSERT INTO users_main (name, phone, create_date)
+VALUES
+('Alice Johnson', '123-456-7890', '2021-05-10'),
+('Bob Smith', '987-654-3210', '2021-08-15'),
+('Charlie Brown', '555-555-5555', '2020-11-23');
+
+-- Вставка данных в таблицу личной информации
+INSERT INTO users_personal (id, birthday, address_line)
+VALUES
+(1, '1985-05-12', '123 Elm Street'),
+(2, '1990-03-22', '456 Oak Avenue'),
+(3, '1975-11-05', '789 Pine Road');
+
+-- Вставка данных в таблицу документов
+INSERT INTO users_documents (id, inn, snils)
+VALUES
+(1, '123456789012', '12345678901'),
+(2, '987654321012', '98765432101'),
+(3, '555555555012', '55555555501');
+
+-- Выборка по всем данным клиента
+SELECT 
+    u.id, 
+    u.name, 
+    u.phone, 
+    u.create_date, 
+    p.birthday, 
+    p.address_line, 
+    d.inn, 
+    d.snils
+FROM users_main u
+JOIN users_personal p ON u.id = p.id
+JOIN users_documents d ON u.id = d.id;
+
+-- Пример с таблицей cars
+CREATE TABLE cars_main (
+    id SERIAL PRIMARY KEY,             -- Идентификатор автомобиля
+    model VARCHAR(100) NOT NULL,       -- Модель автомобиля
+    manufacturer VARCHAR(100) NOT NULL -- Производитель автомобиля
+);
+CREATE TABLE cars_technical (
+    id INT PRIMARY KEY,                -- Идентификатор автомобиля
+    year_release INT NOT NULL,         -- Год выпуска
+    class VARCHAR(50) NOT NULL,        -- Класс автомобиля
+    CONSTRAINT fk_cars_technical FOREIGN KEY (id) REFERENCES cars_main(id) -- Связь с основной таблицей
+);
+CREATE TABLE cars_characteristics (
+    id INT PRIMARY KEY,                -- Идентификатор автомобиля
+    color VARCHAR(50),                 -- Цвет автомобиля
+    engine_capacity DECIMAL(4, 1),     -- Объем двигателя
+    CONSTRAINT fk_cars_characteristics FOREIGN KEY (id) REFERENCES cars_main(id) -- Связь с основной таблицей
+);
+-- Вставка данных в основную таблицу
+INSERT INTO cars_main (model, manufacturer)
+VALUES
+('Model S', 'Tesla'),
+('Civic', 'Honda'),
+('Mustang', 'Ford');
+
+-- Вставка данных в таблицу технической информации
+INSERT INTO cars_technical (id, year_release, class)
+VALUES
+(1, 2020, 'Electric'),
+(2, 2018, 'Compact'),
+(3, 2019, 'Muscle');
+
+-- Вставка данных в таблицу характеристик
+INSERT INTO cars_characteristics (id, color, engine_capacity)
+VALUES
+(1, 'Red', 75.0),
+(2, 'Blue', 1.8),
+(3, 'Black', 5.0);
+
+--Выборка всех данных по машинам
+SELECT 
+    m.id, 
+    m.model, 
+    m.manufacturer, 
+    t.year_release, 
+    t.class, 
+    c.color, 
+    c.engine_capacity
+FROM cars_main m
+JOIN cars_technical t ON m.id = t.id
+JOIN cars_characteristics c ON m.id = c.id;
