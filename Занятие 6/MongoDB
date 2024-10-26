@@ -1,0 +1,88 @@
+//Трогаем на https://onecompiler.com/mongodb
+
+//Создадим две коллекции: cars для информации о машинах и sales для транзакций продаж.
+db.createCollection("cars");
+db.createCollection("sales");
+
+//Вставляем несколько документов в коллекцию cars. 
+//Каждый документ — это JSON-объект, содержащий информацию о машине.
+db.cars.insertMany([
+  {
+    "car_id": 1,
+    "make": "Toyota",
+    "model": "Camry",
+    "year": 2020,
+    "price": 25000,
+    "available": true
+  },
+  {
+    "car_id": 2,
+    "make": "Ford",
+    "model": "Mustang",
+    "year": 2021,
+    "price": 35000,
+    "available": true,
+    "driver_old": "Ivan"
+  },
+  {
+    "car_id": 3,
+    "make": "Tesla",
+    "model": "Model 3",
+    "year": 2022,
+    "price": 45000,
+    "available": true
+  }
+])
+
+//запрос к коллекции cars, чтобы узнать ObjectId машин, если закрыли acknowledged 
+db.cars.findOne({ "make": "Toyota", "model": "Camry" })
+db.cars.findOne({ "make": "Ford", "model": "Mustang" })
+db.cars.findOne({ "make": "Tesla", "model": "Model 3" })
+
+//Вставляем записи о покупках машин
+db.sales.insertMany([
+  {
+    "car_id": 1, // ID машины Toyota Camry
+    "customer_name": "John Doe",
+    "sale_date": new Date("2023-10-01"),
+    "sale_price": 25000,
+    "salesperson": "Emily Smith",
+    "sale_percent": 15
+  },
+  {
+    "car_id": 2, // ID машины Toyota Camry
+    "customer_name": "Jane Doe",
+    "sale_date": new Date("2023-10-05"),
+    "sale_price": 35000,
+    "salesperson": "Michael Brown"
+  }
+  
+])
+//обновить статус проданной машины, мы же не можем продать ее 2 раза:))))
+db.cars.updateOne(
+  { "car_id": 1 },               
+  { $set: { "available": false } }    
+)
+//проверяем
+db.cars.find()
+
+
+//Суммируем все продажи
+db.sales.aggregate([
+  {
+    $group: {
+      _id: null, // Объединяем все документы в один
+      totalSales: { $sum: "$sale_price" } // Суммируем значение поля sale_price
+    }
+  }
+])
+
+//Вычисляем среднее значение суммы продажи
+db.sales.aggregate([
+  {
+    $group: {
+      _id: null,
+      average_sale: { $avg: "$sale_price" } 
+    }
+  }
+])
