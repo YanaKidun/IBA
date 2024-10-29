@@ -1,4 +1,4 @@
-//Пример 1
+//Поддержка циклов, условных операторов
 DECLARE @Counter INT = 0; // объявили переменную Counter с типом int
 WHILE @Counter < 10 // запустили цикл с уловием пока значение Counter <10
 BEGIN //объявили начало выполнения
@@ -6,30 +6,38 @@ BEGIN //объявили начало выполнения
     SET @Counter = @Counter + 1; // увеличили значение переменной Counter
 END; //завершили цикл
 
+//Транзакции
+BEGIN TRANSACTION // объявили начало выполнения транзации
+    UPDATE Accounts SET Balance = Balance - 100 WHERE AccountID = 1; // обновили баланс покупателя
+    UPDATE Accounts SET Balance = Balance + 100 WHERE AccountID = 2; // обновили баланс продавца
+IF @@ERROR <> 0 // включили обработку ошибок
+    ROLLBACK TRANSACTION // при ошибке откатили транзакцию
+ELSE // при отсутвиии ошибок
+    COMMIT TRANSACTION; // закоммитили транзакцию
 
-// код примера 1 для MySQL Workbench
-DELIMITER //
-CREATE PROCEDURE CounterLoop()
-BEGIN
-    DECLARE Counter INT DEFAULT 0;
+//Пример обработки ошибок
+//try-catch
+BEGIN TRY
+    -- Код, который может вызвать ошибку
+    UPDATE Accounts SET Balance = Balance - 100 WHERE AccountID = 1;
+END TRY
+BEGIN CATCH
+    PRINT 'An error occurred';
+    PRINT ERROR_MESSAGE();
+END CATCH;
 
-    WHILE Counter < 10 DO
-        SELECT CONCAT('Counter value: ', Counter);
-        SET Counter = Counter + 1;
-    END WHILE;
-END //
-DELIMITER ;
+//Обработка JSON и XML
+DECLARE @json NVARCHAR(MAX) = N'{"id": 1, "name": "John"}';
+SELECT JSON_VALUE(@json, '$.name') AS EmployeeName;
 
-CALL CounterLoop();
+//Аналитика
+//ROW_NUMBER() -- присваивает уникальный номер строке в пределах каждого раздела набора данных
+//RANK() -- рисваивает уникальный номер строке, но если две строки имеют одинаковые значения в столбце, по которому осуществляется сортировка, они получают один и тот же номер, а следующий номер пропускается 
+//DENSE_RANK() -- работает аналогично RANK(), но не пропускает номера. 
+//NTILE() --разбивает набор строк на заданное количество групп и присваивает каждой строке номер группы.
 
-//код примера 1 для DBeaver
+SELECT EmployeeID, Salary,
+    RANK() OVER (ORDER BY Salary DESC) AS SalaryRank
+FROM Employees;
 
-CREATE PROCEDURE CounterLoop()
-BEGIN
-    DECLARE Counter INT DEFAULT 0;
-    WHILE Counter < 10 DO
-        SELECT CONCAT('Counter value: ', Counter);
-        SET Counter = Counter + 1;
-    END WHILE;
-END;
-call CounterLoop;
+
