@@ -1,0 +1,35 @@
+//Пример 1
+DECLARE @Counter INT = 0; // объявили переменную Counter с типом int
+WHILE @Counter < 10 // запустили цикл с уловием пока значение Counter <10
+BEGIN //объявили начало выполнения
+    PRINT 'Counter value: ' + CAST(@Counter AS VARCHAR); // выводить Counter value: и значение переменной Counter
+    SET @Counter = @Counter + 1; // увеличили значение переменной Counter
+END; //завершили цикл
+
+
+// код примера 1 для MySQL Workbench
+DELIMITER //
+CREATE PROCEDURE CounterLoop()
+BEGIN
+    DECLARE Counter INT DEFAULT 0;
+
+    WHILE Counter < 10 DO
+        SELECT CONCAT('Counter value: ', Counter);
+        SET Counter = Counter + 1;
+    END WHILE;
+END //
+DELIMITER ;
+
+CALL CounterLoop();
+
+//код примера 1 для DBeaver
+
+CREATE PROCEDURE CounterLoop()
+BEGIN
+    DECLARE Counter INT DEFAULT 0;
+    WHILE Counter < 10 DO
+        SELECT CONCAT('Counter value: ', Counter);
+        SET Counter = Counter + 1;
+    END WHILE;
+END;
+call CounterLoop;
