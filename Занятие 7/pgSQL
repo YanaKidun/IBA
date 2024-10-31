@@ -1,0 +1,96 @@
+//Создание триггерной функции на проверку даты
+CREATE OR REPLACE FUNCTION check_date_overlap() 
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Проверяем, есть ли пересечение дат для одинакового кода
+    IF EXISTS (
+        SELECT 1 
+        FROM dict_example_non_depend_date 
+        WHERE code = NEW.code 
+        AND is_active = TRUE -- только для активных записей
+        AND NEW.date_start <= date_end 
+        AND NEW.date_end >= date_start
+    ) THEN
+        -- Если пересечение найдено, выбрасываем ошибку
+        RAISE EXCEPTION 'Пересечение дат для кода "%" найдено.', NEW.code;
+    END IF;
+
+    -- Если пересечения нет, продолжаем вставку
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+//Создание триггера на вызов функции
+CREATE TRIGGER trigger_check_date_overlap
+BEFORE INSERT OR UPDATE
+ON dict_example_non_depend_date
+FOR EACH ROW
+EXECUTE FUNCTION check_date_overlap();
+
+/* процедура*/
+DELIMITER //
+CREATE PROCEDURE show_books (IN name INT UNSIGNED)
+BEGIN
+	SELECT b.name FROM books b
+WHERE b.genre = (SELECT DISTINCT g.id  FROM orders o 
+JOIN   books b 
+ON o.book =b.id
+JOIN   genres g
+ON b.genre=g.id
+WHERE o.from_user =5)
+ORDER BY RAND () 
+LIMIT 2;
+END// 
+
+CALL show_books;
+
+//отличие функции от процедуры:
+Функции используются, когда необходимо вернуть значение, оформив вашу логику в виде SQL-выражения (например, рассчитывать налоги с плаьежей) и показывать их сумму.
+Функция используется в SELECT
+Процедура -  сложные манипуляции, когда возвращать значение не требуется, либо требуются циклы и условные конструкции, и нам надо что -то обновить/удалить в базе.
+Процедура не используется с SELECT, но часто внутри себя содержит update
+
+//представление
+/* Представление для рйтинга по книгам*/
+CREATE VIEW Rating_book_NOW AS
+SELECT 
+    AVG(r.grade) AS rating_book,         
+    b.name AS book_name,                 
+    a.name AS author_name                
+FROM 
+    ratings r
+JOIN 
+    books b ON r.to_book = b.id           
+JOIN 
+    authors a ON b.author = a.id          
+GROUP BY 
+    b.name, a.name;                       
+
+SELECT *FROM  Rating_book_NOW;
+
+//транзакция
+-- Проверяем наличие книги на складе в городе Минск
+SELECT s.number_book, s.city  
+FROM storehouse s  
+WHERE s.book = 1 AND s.city = 'Minsk';
+
+-- Проверяем текущее количество книг в заказах от пользователя с ID 4
+SELECT o.number_book  
+FROM orders o  
+WHERE o.from_user = 4;
+
+-- Начинаем транзакцию для обеспечения атомарности изменений
+START TRANSACTION;
+
+-- Увеличиваем количество книг в заказе пользователя с ID 4 на 1
+UPDATE orders 
+SET number_book = number_book + 1 
+WHERE from_user = 4;
+
+-- Уменьшаем количество книг на складе в Минске на 1
+UPDATE storehouse 
+SET number_book = number_book - 1 
+WHERE book = 1 AND city = 'Minsk';
+
+-- Фиксируем изменения, сделанные в рамках транзакции
+COMMIT;
