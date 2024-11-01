@@ -1,0 +1,123 @@
+CREATE TABLE Products (
+    ProductID INT PRIMARY KEY,               
+    ProductName VARCHAR(100),                
+    Price DECIMAL(10, 2),                    
+    Tax DECIMAL(10, 2),                     
+    Discount DECIMAL(10, 2),                 
+    Quantity INT                            
+);
+
+INSERT INTO Products (ProductID, ProductName, Price, Tax, Discount, Quantity)
+VALUES
+(1, 'Product A', 100.00, 10.00, 5.00, 50),
+(2, 'Product B', 200.00, 20.00, 10.00, 30),
+(3, 'Product C', 150.00, 15.00, 7.50, 20),
+(4, 'Product D', 120.00, 12.00, 6.00, 15),
+(5, 'Product E', 80.00, 8.00, 4.00, 60);
+
+--Оператор равенства (=): Проверяет, равно ли значение в столбце заданному значению.
+SELECT * 
+FROM Products
+WHERE Price = 100.00;-- Находим все товары с ценой 100.00
+
+--Оператор неравенства (<> или !=): Проверяет, не равны ли значения.
+SELECT * 
+FROM Products
+WHERE Price <> 100.00; -- Находим все товары, чья цена не равна 100.00
+
+--Оператор больше (>): Находит значения больше заданного.
+SELECT * 
+FROM Products
+WHERE Price > 100.00;-- Находим все товары с ценой больше 100.00
+
+--Оператор меньше (<): Находит значения меньше указанного.
+SELECT * 
+FROM Products
+WHERE Price < 100.00;-- Находим все товары с ценой меньше 100.00
+
+--Оператор больше или равно (>=): Находит значения, которые больше или равны указанному значению.
+SELECT * 
+FROM Products
+WHERE Price >= 100.00;-- Находим все товары с ценой больше или равной 100.00
+
+--Оператор меньше или равно (<=): Находит значения, которые меньше или равны указанному значению.
+SELECT * 
+FROM Products
+WHERE Price <= 100.00; -- Находим все товары с ценой меньше или равной 100.00
+
+--Оператор BETWEEN: Находит значения в указанном диапазоне, включая границы.
+SELECT * 
+FROM Products
+WHERE Price BETWEEN 80.00 AND 150.00; -- Находим все товары с ценой между [80.00;150.00]
+
+--Оператор IN: Проверяет, входит ли значение в список.
+SELECT * 
+FROM Products
+WHERE Price IN (100.00, 150.00, 200.00); -- Находим товары с ценой 100.00, 150.00 или 200.00
+
+--Оператор NOT IN: Находит значения, которые не входят в указанный список.
+SELECT * 
+FROM Products
+WHERE Price NOT IN (100.00, 150.00);-- Находим товары, у которых цена не равна 100.00 и 150.00
+
+--Оператор LIKE: Используется для поиска строк, соответствующих шаблону. 
+SELECT * 
+FROM Products
+WHERE ProductName LIKE 'P%'; -- Находим товары, название которых начинается с буквы "P"
+
+SELECT * 
+FROM Products
+WHERE ProductName LIKE '%t' -- Находим товары, название которых заканчивается на букву "t"
+
+SELECT * 
+FROM Products
+WHERE ProductName LIKE '_r%';--Находим товары у которых вторая буква "r"
+
+SELECT * 
+FROM Products
+WHERE ProductName LIKE '___A%';--Находим товары у которых вторая буква "A"
+
+
+--Оператор IS NULL и IS NOT NULL: Определяет, является ли значение NULL (неопределенным) или нет.
+SELECT * 
+FROM Products
+WHERE Discount IS NULL; -- Находим товары, у которых значение скидки не указано (NULL)
+
+SELECT * 
+FROM Products
+WHERE Discount IS NOT NULL; -- Находим товары, у которых указана скидка
+
+--Сложение:
+SELECT 
+    ProductName, 
+    Price + Tax AS TotalPriceWithTax -- сумма цены и налогов
+FROM 
+    Products;
+
+--Вычитание:
+SELECT 
+    ProductName, 
+    Price - Discount AS DiscountedPrice -- стоимость с учетом скидки
+FROM 
+    Products;
+    
+--Умножение: 
+SELECT 
+    ProductName, 
+    Quantity * Price AS TotalInventoryValue -- стоимость товаров на складе
+FROM 
+    Products;
+
+--Деление:
+SELECT 
+    ProductName, 
+    (Price - Discount) / Quantity AS PricePerUnit -- цена за единицу товара с учетом скидки
+FROM 
+    Products;
+    
+--Остаток от деления:
+SELECT 
+    ProductName, 
+    Quantity % 10 AS Remainder
+FROM 
+    Products;
