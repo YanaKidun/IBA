@@ -1,0 +1,19 @@
+--Проверим, есть лостаточное кол-ко товаров на скалде для заказа
+DO $$
+DECLARE
+    stock_threshold INT := 10;         -- Минимальный порог запаса
+    product_id INT := 1;               -- Идентификатор продукта
+    current_stock INT;                 -- Переменная для хранения текущего запаса
+BEGIN
+    -- Получаем текущее количество на складе для выбранного товара
+    SELECT Quantity INTO current_stock
+    FROM Products
+    WHERE ProductID = product_id;
+    
+    -- Проверяем, достаточно ли запаса, чтобы выполнить заказ
+    IF current_stock < stock_threshold THEN
+        RAISE NOTICE 'Запас продукта с ID % ниже минимального уровня!', product_id;
+    ELSE
+        RAISE NOTICE 'Запас продукта с ID % достаточный.', product_id;
+    END IF;
+END $$;
