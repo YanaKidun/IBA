@@ -1,0 +1,24 @@
+--Проверяем количество товара на складе перед обновлением записи в таблице Products
+--Функция, которая будет возращать триггер
+CREATE OR REPLACE FUNCTION check_stock_before_update() RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.Quantity < 5 THEN --проверяем значение поля Quantity у обновляемой записи.
+        RAISE NOTICE 'Запас продукта с ID % слишком низкий!', NEW.ProductID;
+    END IF;
+    RETURN NEW; -- возращаем новую запись (NEW) для завершения работы триггера.
+END $$ LANGUAGE plpgsql;
+
+--триггер
+CREATE TRIGGER before_product_update
+BEFORE UPDATE ON Products
+FOR EACH ROW
+EXECUTE FUNCTION check_stock_before_update();
+
+--проверка
+INSERT INTO Products (ProductID, ProductName, Price, Tax, Discount, Quantity)
+VALUES
+(100, 'Product AX', 100.00, 10.00, 5.00, 1),
+(101, 'Product BX', 200.00, 20.00, 10.00, 30);
+
+UPDATE Products SET Tax = 12.00
+WHERE ProductID = 100;
