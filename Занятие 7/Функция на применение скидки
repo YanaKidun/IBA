@@ -1,0 +1,40 @@
+CREATE OR REPLACE FUNCTION apply_discount(product_id INT) RETURNS VOID AS $$
+DECLARE
+    discount_threshold NUMERIC := 100.00; -- Порог цены для скидки, если выше - применяем дисконт
+    discount_amount NUMERIC := 10.00;     -- Скидка в денежном выражении(-10 от цены)
+    current_price NUMERIC;
+BEGIN
+    -- Получаем текущую цену товара
+    SELECT Price INTO current_price
+    FROM Products
+    WHERE ProductID = product_id;
+    
+    -- Применяем скидку, если цена превышает порог
+    IF current_price > discount_threshold THEN
+        UPDATE Products
+        SET Price = Price - discount_amount
+        WHERE ProductID = product_id;
+        RAISE NOTICE 'Скидка применена к продукту с ID %', product_id;
+    ELSE
+        RAISE NOTICE 'Цена продукта с ID % ниже порога скидки.', product_id;
+    END IF;
+END $$ LANGUAGE plpgsql;
+
+-- Добавляем продукт с ценой выше порога скидки (например, 120.00)
+INSERT INTO Products (ProductID, ProductName, Price, Quantity, Tax)
+VALUES (115, 'Product_AC', 120.00, 20, 5.00);
+
+-- Добавляем продукт с ценой ниже порога скидки (например, 80.00)
+INSERT INTO Products (ProductID, ProductName, Price, Quantity, Tax)
+VALUES (117, 'Product_BC', 80.00, 15, 5.00);
+
+--применяем функцию к стоимость продукта
+SELECT apply_discount(115);
+SELECT apply_discount(117);
+
+--проверяем выполнение
+SELECT ProductID, ProductName, Price
+FROM Products
+WHERE ProductID IN (115, 117);
+
+
