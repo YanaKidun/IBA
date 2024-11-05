@@ -1,0 +1,126 @@
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Заполнение таблицы  Статус
+-- -----------------------------------------------------
+
+INSERT INTO `IBA_3`.`status` (`status_id`, `name`) VALUES
+(1, 'Normal'), -- любой зарегистрировавшийся клиент
+(2, 'VIP'), -- вип клиент
+(3, 'New'), -- новый заказ
+(4, 'Cancelled'), -- заказ отменен клиентом (удалил все из корзины)
+(5, 'Disbanded'), -- для тайм-аута нахождения в заказе (системно удалили зарезрвированные продукты из корзины)
+(6, 'Paid'),-- оплачен
+(7, 'Returned'); -- возврат покупателя заказа; 
+
+-- -----------------------------------------------------
+-- Заполнение таблицы  Клиент
+-- -----------------------------------------------------
+
+INSERT INTO `IBA_3`.`client` (`client_id`, `last_ame`, `first_name`, `email`, `client_status_id`)
+VALUES
+(DEFAULT, 'Ivanov', 'Ivan', 'ivanov@example.com', DEFAULT),
+(DEFAULT, 'Petrov', 'Petr', 'petrov@example.com', DEFAULT),
+(DEFAULT, 'Sidorov', 'Sidr', 'sidorov@example.com', DEFAULT ),
+(DEFAULT, 'Nikolaev', 'Nikolay', 'nikolaev@example.com', DEFAULT),
+(DEFAULT, 'Fedorov', 'Fedor', 'fedorov@example.com', DEFAULT ),
+(DEFAULT, 'Smirnov', 'Sergey', 'smirnov@example.com', DEFAULT),
+(DEFAULT, 'Kozlov', 'Kirill', 'kozlov@example.com', DEFAULT),
+(DEFAULT, 'Markov', 'Mark', 'markov@example.com', DEFAULT),
+(DEFAULT, 'Orlov', 'Oleg', 'orlov@example.com', DEFAULT),
+(DEFAULT, 'Yakovlev', 'Yakov', 'yakovlev@example.com', DEFAULT);
+
+-- -----------------------------------------------------
+-- Заполнение таблицы  Группы продуктов
+-- -----------------------------------------------------
+
+INSERT INTO `IBA_3`.`product_group` (`product_group_id`, `group_name`, `create_time`)
+VALUES
+(1, 'Молоко', CURRENT_TIMESTAMP),
+(2, 'Сыр', CURRENT_TIMESTAMP),
+(3, 'Творог', CURRENT_TIMESTAMP),
+(4, 'Масло сливочное', CURRENT_TIMESTAMP),
+(5, 'Йогурт', CURRENT_TIMESTAMP),
+(6, 'Кефир', CURRENT_TIMESTAMP),
+(7, 'Творожные сырки', CURRENT_TIMESTAMP),
+(8, 'Плавленный сыр', CURRENT_TIMESTAMP),
+(9, 'Молочная сыворотка', CURRENT_TIMESTAMP),
+(10, 'Сгущеное молоко', CURRENT_TIMESTAMP);
+
+- -----------------------------------------------------
+-- Заполнение таблицы  Продукт
+-- -----------------------------------------------------
+
+INSERT INTO `IBA_3`.`product` (`product_id`, `product_group_id`, `product_name`, `start_price`, `discount`, `product_char_code`, `count_of_products_warehouse`, `create_time`, `update_time`)
+VALUES
+(DEFAULT, 1, 'Милкавита 3,5%', 1.99, 2.00, 'SPH001', 150, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(DEFAULT, 1, 'Простоквашино 3,5%', 2.99, 2.00, 'SPH002', 20, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(DEFAULT, 1, 'Простоквашино 1,2%', 2.99, 5.00, 'SPH003', 150, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(DEFAULT, 1, 'Простоквашино 2,5%', 2.99, 8.00, 'SPH004', 450,  CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(DEFAULT, 2, 'Милкавита 45,5%', 51.99, 2.00, 'SPH011', 125, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(DEFAULT, 2, 'Простоквашино 44,5%', 52.99, 2.00, 'SPH012',128, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(DEFAULT, 2, 'Простоквашино 46,2%', 52.99, 5.00, 'SPH013', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(DEFAULT, 2, 'Простоквашино 44,5%', 42.99, 8.00, 'SPH014', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(DEFAULT, 2, 'Молочные горки 38,5%', 51.99, 2.00, 'SPH015', 190, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(DEFAULT, 2, 'Ляховичок 40,5%', 41.99, 1, 'SPH016', 58,  CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(DEFAULT, 3, 'ГМЗ 2,5%', 5.99, 2, 'SPH0021', 155.22, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(DEFAULT, 3, 'Милкавита 5,5%', 5.99, 2.00, 'SPH022', 10.13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(DEFAULT, 3, 'Простоквашино 4,5%', 4.99, 2.00, 'SPH023', 8.123,  CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(DEFAULT, 3, 'Простоквашино 4,2%', 3.99, 5.00, 'SPH024', 0.115, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(DEFAULT, 3, 'ГМЗ 5,5%', 4.99, 2, 'SPH0031', 2.590, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+- -----------------------------------------------------
+-- Заполнение таблицы  Заказ клиента
+-- -----------------------------------------------------
+
+INSERT INTO `IBA_3`.`client_order` (`client_cart_id`, `client_id`, `client_cart_status_id`, `client_cart_sum`, `update_time`, `create_time`)
+VALUES
+(1, 1, default, default, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+- -----------------------------------------------------
+-- Заполнение таблицы  линковочной таблицы
+-- -----------------------------------------------------
+
+INSERT INTO `IBA_3`.`client_order_detail` (`row_id`, `client_cart_id`, `product_id`, `product_price_with_discount`, `product_count`, `update_time`, `create_time`)
+VALUES
+(DEFAULT, 1, 1, 2.99, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+
+-- -----------------------------------------------------
+-- отключение хаотичной вставки данных в таблицы 
+-- ранее UNIQUE_CHECKS=0 временно отключает проверку уникальности
+-- ранее FOREIGN_KEY_CHECKS=0 временно отключает проверку внешних ключей
+-- -----------------------------------------------------
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+INSERT INTO `IBA_3`.`client_order` (`client_cart_id`, `client_id`, `client_cart_status_id`, `client_cart_sum`, `update_time`, `create_time`)
+VALUES
+(2, 1, default, default, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO `IBA_3`.`client_order_detail` (`row_id`, `client_cart_id`, `product_id`, `product_price_with_discount`, `product_count`, `update_time`, `create_time`)
+VALUES
+(DEFAULT, 2, 1, 2.99, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+
+-- -----------------------------------------------------
+-- Проверка вставки в таблицу с / без CONSTRAINT с отключенными ограничениями
+-- -----------------------------------------------------
+
+INSERT INTO `IBA_3`.`client` (`client_id`, `last_ame`, `first_name`, `email`, `client_status_id`) -- CONSTRAINT на уровне FK нет
+VALUES
+(DEFAULT, 'KRlikov', 'Ivan', 'Rylнннivanov@example.com', 103);
+
+INSERT INTO `IBA_3`.`product` (`product_id`, `product_group_id`, `product_name`, `start_price`, `discount`, `product_char_code`, `count_of_products_warehouse`, `create_time`, `update_time`)
+VALUES -- CONSTRAINT на уровне FK есть
+(DEFAULT, 1025, 'Милкавита 3,5%', 1.99, 2.00, 'SPH001', 150, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+
+
+
+
+
