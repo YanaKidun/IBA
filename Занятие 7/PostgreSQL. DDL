@@ -1,0 +1,118 @@
+-- -----------------------------------------------------
+-- Создание таблицы Статус
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS "status" (
+  "status_id" INT NOT NULL PRIMARY KEY,
+  "name" VARCHAR(10) NOT NULL
+);
+
+/* Создание таблицы rлиент */
+CREATE TABLE IF NOT EXISTS client (
+  client_id SERIAL PRIMARY KEY,  /* Автоинкрементный идентификатор клиента */
+  last_name VARCHAR(50) NOT NULL, 
+  first_name VARCHAR(50) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE, 
+  client_status_id INT NOT NULL DEFAULT 1, 
+  client_amout_order DECIMAL(8,2) NOT NULL DEFAULT 0.00,
+  create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+  update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+  FOREIGN KEY (client_status_id) REFERENCES status (status_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+);
+
+/* Создание уникального индекса для таблицы Клиент по полю emai*/
+CREATE UNIQUE INDEX email_unique ON client (email);
+
+/* Создание таблицы product_group*/
+CREATE TABLE IF NOT EXISTS product_group (
+  product_group_id INT NOT NULL,               
+  group_name VARCHAR(255) NOT NULL,             
+  create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (product_group_id)
+);
+
+/* Создание таблицы product */
+CREATE TABLE IF NOT EXISTS product (
+  product_id SERIAL PRIMARY KEY,               
+  product_group_id INT NOT NULL,             
+  product_name VARCHAR(50) NOT NULL,           
+  start_price DECIMAL(5,2) NOT NULL,          
+  discount DECIMAL(5,2) DEFAULT 0.00,          
+  price_with_discount DECIMAL(8,2) GENERATED ALWAYS AS (start_price - (start_price / 100 * discount)) STORED, 
+  product_char_code VARCHAR(8) NOT NULL,       
+  count_of_products_warehouse DECIMAL(8,3) NOT NULL, 
+  create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+  update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+  CONSTRAINT fk_product_group1               
+    FOREIGN KEY (product_group_id)
+    REFERENCES product_group (product_group_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+);
+
+/* Создание индекса для product по полю product_group_id*/
+CREATE INDEX fk_product_group1_idx ON product (product_group_id);
+
+
+/* Создание таблицы client_order для хранения заказов клиентов.*/
+CREATE TABLE IF NOT EXISTS client_order (
+  client_cart_id SERIAL PRIMARY KEY,          
+  client_id INT NOT NULL,                      
+  client_cart_status_id INT NOT NULL DEFAULT 3,/* Статус корзины клиента, по умолчанию 3 */
+  client_cart_sum DECIMAL(8,2) NOT NULL DEFAULT 0.00,
+  update_time TIMESTAMP NULL,                  
+  create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+  CONSTRAINT fk_client_order /* Ограничение внешнего ключа fk_client_order:  Проверяет наличие клиента */
+    FOREIGN KEY (client_id)
+    REFERENCES client (client_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+   CONSTRAINT fk_client_order_status /* проверка наличиястатуса корзины */
+    FOREIGN KEY (client_cart_status_id)
+    REFERENCES status (status_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+);
+
+/* Создание индексов для ускорения поиска по полям client_id и client_cart_status_id в таблице client_order.*/
+CREATE INDEX fk_client_order_idx ON client_order (client_id);
+CREATE INDEX fk_client_order_status_idx ON client_order (client_cart_status_id);
+
+/*  Создание таблицы client_order_detail*/
+CREATE TABLE IF NOT EXISTS client_order_detail (
+  row_id SERIAL PRIMARY KEY,                
+  client_cart_id INT NOT NULL,              
+  product_id INT NOT NULL,                  
+  product_price_with_discount DECIMAL(8,2) NOT NULL,
+  product_count DECIMAL(8,3) NOT NULL,     
+  amount_product_sum DECIMAL(8,2) GENERATED ALWAYS AS (product_price_with_discount * product_count) STORED,
+  update_time TIMESTAMP NULL,              
+  create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+  CONSTRAINT fk_client_cart_id
+    FOREIGN KEY (client_cart_id)
+    REFERENCES client_order (client_cart_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT fk_cart_id_product_id
+    FOREIGN KEY (product_id)
+    REFERENCES product (product_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+);
+
+
+ /* создание представления на товары, остаток которых бльше 3 ед*/
+
+CREATE  OR REPLACE VIEW view_products_in_stock AS
+    SELECT 
+        p.product_id,
+        p.product_name,
+        p.price_with_discount,
+        p.count_of_products_warehouse
+    FROM
+        product AS p
+    WHERE
+        p.count_of_products_warehouse > 3;
+
+select * from view_products_in_stock;
