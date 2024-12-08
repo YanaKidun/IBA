@@ -1,0 +1,218 @@
+FORMAT: 1A
+HOST: https://api.yana_shop.com
+
+# IBA API v1.0.0
+
+Polls is a simple API allowing consumers to view and manage store entities such as products, carts, orders, and users.
+
+## Group Products
+
+### List All Products [GET]
+Retrieves a list of products available in the store.
+
++ Parameters
+    + group (optional, string) - Filter products by category.
+    + pageSize (optional, integer, default: `10`) - The number of items per page.
+
++ Response 200 (application/json)
+
+        [
+            {
+                "id": 1,
+                "name": "Сыр 3.5%",
+                "price": 12.50,
+                "category": "Cыр",
+                "stock": 10
+            },
+            {
+                "id": 2,
+                "name": "Cыр 55,5%",
+                "price": 58,9,
+                "category": "Сыр",
+                "stock": 25
+            }
+        ]
+
+### Add a New Product [POST]
+Adds a new product to the store.
+
++ Request (application/json)
+
+        {
+            "name": "Молоко 3,5%
+            "price": 1,99,
+            "category": "Молоко",
+            "stock": 50
+        }
+
++ Headers
+    Authorization: Bearer <token>
+
++ Response 201
+    Product successfully added.
+
+### Retrieve Product Details [GET/{productId}]
+Retrieves details of a specific product by its ID.
+
++ Parameters
+    + productId (required, integer) - The ID of the product.
+
++ Response 200 (application/json)
+
+            {
+                "id": 1,
+                "name": "Сыр 3.5%",
+                "price": 12.50,
+                "category": "Cыр",
+                "stock": 10
+            }
+
++ Response 404
+    Product not found.
+
+### Delete Product [DELETE/{productId}]
+Deletes a specific product by its ID.
+
++ Parameters
+    + productId (required, integer) - The ID of the product.
+
++ Headers
+    Authorization: Bearer <token>
+
++ Response 200
+    Product successfully deleted.
+    
++Response 403
+    Forbidden.
+
+## Group Cart
+
+### Add to Cart [POST]
+Adds a product to the shopping cart.
+
++ Request (application/json)
+
+        {
+            "productId": 1,
+            "quantity": 2
+        }
+
++ Headers
+    Authorization: Bearer <token>
+
++ Response 201
+    Product successfully added to the cart.
+
+## Group Orders
+
+### Submit an Order [POST]
+Submits a new order.
+
++ Request (application/json)
+
+        {
+            "userId": 123,
+            "items": [
+                {
+                    "productId": 1,
+                    "quantity": 2
+                },
+                {
+                    "productId": 2,
+                    "quantity": 1
+                }
+            ],
+            "totalAmount": 3100.99,
+            "paymentMethod": "Credit Card"
+        }
+
++ Headers
+    Authorization: Bearer <token>
+
++ Response 200 (application/json)
+
+        {
+            "orderId": 456,
+            "estimatedDeliveryDate": "2023-12-20"
+        }
+
++ Response 400
+    Invalid order details.
+
+## Group Users
+
+### List All Users [GET]
+Retrieves a list of all users.
+
++ Response 200 (application/json)
+
+        [
+            {
+                "id": 123,
+                "name": "John Doe",
+                "email": "john.doe@example.com",
+                "status": "active"
+            },
+            {
+                "id": 124,
+                "name": "Jane Smith",
+                "email": "jane.smith@example.com",
+                "status": "inactive"
+            }
+        ]
+
+### Add a New User [POST]
+Adds a new user.
+
++ Request (application/json)
+
+        {
+            "name": "New User",
+            "email": "new.user@example.com",
+            "status": "active"
+        }
+
++ Headers
+    Authorization: Bearer <token>
+
++ Response 201
+    User successfully added.
+
+### Retrieve User Details [GET/{userId}]
+Retrieves details of a specific user by their ID.
+
++ Parameters
+    + userId (required, integer) - The ID of the user.
+
++ Response 200 (application/json)
+
+        {
+            "id": 123,
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "status": "VIP"
+        }
+
++ Response 404
+    User not found.
+
+### Update User Details [PATCH/{userId}]
+Updates user details or status (e.g., block or unblock a user).
+
++ Parameters
+    + userId (required, integer) - The ID of the user.
+
++ Request (application/json)
+
+        {
+            "name": "Updated User",
+            "email": "updated.user@example.com",
+            "status": "normal"
+        }
+
++ Headers
+    Authorization: Bearer <token>
+
++ Response 200
+    User successfully updated.
+
