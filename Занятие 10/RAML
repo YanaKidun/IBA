@@ -1,0 +1,255 @@
+#%RAML 1.0
+title: IBA
+version: 1.0.0
+baseUri: https://api.yana_shop.com
+
+/Products:
+  get:
+    description: Retrieves a list of products available in the store.
+    responses:
+      200:
+        body:
+          application/json:
+            type: Product[]
+    queryParameters:
+      group:
+        description: Filter products by category.
+        type: string
+      pageSize:
+        description: The number of items per page.
+        type: integer
+        required: false
+        default: 10
+  
+  post:
+    description: Adds a new product to the store.
+    headers:
+      Authorization:
+        description: Bearer token for authorization.
+        type: string
+        required: true
+    body:
+      application/json:
+        type: Product
+    responses:
+      201:
+        description: Product successfully added.
+      401:
+        description: Unauthorized.
+      403:
+        description: Forbidden.
+      500:
+        description: Server Error.
+
+
+
+/Product/{productId}:
+  get:
+    description: Retrieves details of a specific product by ID.
+    responses:
+      200:
+        body:
+          application/json:
+            type: Product
+      404:
+        description: Product not found.
+  delete:
+    description: Delete product by ID.
+    headers:
+      Authorization:
+        description: Bearer token for authorization.
+        type: string
+        required: true
+    responses:
+      200:
+        description: Product successfully deleted.
+  patch:
+    description: Updates product details.
+    headers:
+      Authorization:
+        description: Bearer token for authorization.
+        type: string
+        required: true
+    body:
+      application/json:
+        type: ProductUpdate
+    responses:
+      200:
+        description: Product successfully updated.
+
+      
+
+/Cart:
+  get:
+    description: Retrieves the current user's shopping cart.
+    responses:
+      200:
+        body:
+          application/json:
+            type: Cart
+
+  post:
+    description: Adds a product to the shopping cart.
+    headers:
+      Authorization:
+        description: Bearer token for authorization.
+        type: string
+        required: true
+    body:
+      application/json:
+        type: CartItem
+    responses:
+      201:
+        description: Product successfully added to the cart.
+
+/Order:
+  post:
+    description: Submits a new order.
+    headers:
+      Authorization:
+        description: Bearer token for authorization.
+        type: string
+        required: true
+    body:
+      application/json:
+        type: Order
+    responses:
+      200:
+        body:
+          application/json:
+            type: Order
+      400:
+        description: Invalid order details.
+
+/Users:
+  get:
+    description: Retrieves a list of all users.
+    responses:
+      200:
+        body:
+          application/json:
+            type: User[]
+
+  post:
+    description: Adds a new user.
+    headers:
+      Authorization:
+        description: Bearer token for authorization.
+        type: string
+        required: true
+    body:
+      application/json:
+        type: User
+    responses:
+      201:
+        description: User successfully added.
+
+/User/{userId}:
+  get:
+    description: Retrieves details of a specific user by their ID.
+    responses:
+      200:
+        body:
+          application/json:
+            type: User
+      404:
+        description: User not found.
+
+  patch:
+    description: Updates user details or status (e.g., block or unblock a user).
+    headers:
+      Authorization:
+        description: Bearer token for authorization.
+        type: string
+        required: true
+    body:
+      application/json:
+        type: UserUpdate
+    responses:
+      200:
+        description: User successfully updated.
+
+types:
+  Product:
+    type: object
+    properties:
+      id: integer
+      name: string
+      description: string
+      price: number
+      category: string
+      stock: integer
+
+  ProductUpdate:
+    type: object
+    properties:
+      name?: string
+      description?: string
+      price?: number
+
+
+  Cart:
+    type: object
+    properties:
+      items: CartItem[]
+      totalAmount: number
+
+  CartItem:
+    type: object
+    properties:
+      productId: integer
+      quantity: integer
+      price: number
+
+  Order:
+    type: object
+    properties:
+      userId: integer
+      items: CartItem[]
+      totalAmount: number
+      paymentMethod: string
+
+  User:
+    type: object
+    properties:
+      id: integer
+      name: string
+      email: string
+      status: string
+
+  UserUpdate:
+    type: object
+    properties:
+      name?: string
+      status?: string
+      #?- необязательное. Если этого свойства нет в запросе, оно просто не изменится.
+
+
+
+
+resourceTypes:
+  resourceWithId:
+    get:
+      description: Retrieves details of a specific resource by ID.
+      responses:
+        200:
+          body:
+            application/json:
+              type: <<resourceType>>
+        404:
+          description: Resource not found.
+        500:
+          description: Server Error.
+
+# Использование resourceTypes для продукта
+  /Product/{productId}:
+    type:
+      resourceWithId:
+       resourceType: Product   
+
+  /Group/{groupId}:
+    type:
+      resourceWithId:
+       resourceType: Group   
+
+
